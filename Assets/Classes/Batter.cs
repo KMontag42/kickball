@@ -21,7 +21,11 @@ public class Batter : MonoBehaviour {
 	}
 
 	public void SwingBat() {
-		this.rigidbody.AddForce((Vector3.up + Vector3.forward) * 1000000);
+		float multiplier = Random.Range (1000000, 5000000);
+
+		Debug.Log(multiplier);
+
+		this.rigidbody.AddForce((Vector3.up + Vector3.forward) * multiplier);
 	}
 
 	public void ResetBat() {

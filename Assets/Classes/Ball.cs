@@ -28,10 +28,12 @@ public class Ball : MonoBehaviour
 
 	public GameObject camera;
 	private Vector3 cameraStart;
+	private Quaternion cameraStartRotation;
 
 	void Awake()
 	{
 		cameraStart = camera.transform.position;
+		cameraStartRotation = camera.transform.rotation;
 	}
 
 	void OnCollisionEnter (Collision collision)
@@ -98,9 +100,13 @@ public class Ball : MonoBehaviour
 		}
 
 		if (this.beenHit) {
-			camera.transform.position = new Vector3 (this.transform.position.x, this.transform.position.y + 5, this.transform.position.z - 5); 
+			camera.GetComponent<SmoothLookAt>().target = this.gameObject.transform;
+			camera.GetComponent<SmoothFollow>().target = this.gameObject.transform;
 		} else {
 			camera.transform.position = this.cameraStart;
+			camera.transform.rotation = this.cameraStartRotation;
+			camera.GetComponent<SmoothLookAt>().target = null;
+			camera.GetComponent<SmoothFollow>().target = null;
 		}
 	}
 }
