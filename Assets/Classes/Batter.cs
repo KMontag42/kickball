@@ -9,7 +9,7 @@ public class Batter : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		this.startingPosition = new Vector3(0,3,-10);
+		this.startingPosition = new Vector3(-.55f,3,-10);
 	}
 	
 	// Update is called once per frame

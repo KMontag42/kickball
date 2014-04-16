@@ -7,7 +7,7 @@ public class SKZInitTestApp : MonoBehaviour {
 		// 213 is the Game ID
 		// SkillzSandbox is the Skillz server to connect to
 		// (SkillzSandbox for development/testing).
-		Skillz.skillzInitForGameIdAndEnvironment("110", Skillz.SkillzEnvironment.SkillzSandbox);
+		Skillz.skillzInitForGameIdAndEnvironment("109", Skillz.SkillzEnvironment.SkillzSandbox);
 		Skillz.launchSkillz(Skillz.SkillzOrientation.SkillzLandscape);
 	}
 
