@@ -7,9 +7,11 @@ public class Batter : MonoBehaviour {
 
 	private Vector3 startingPosition;
 
+	public Ball Ball;
+
 	// Use this for initialization
 	void Awake () {
-		this.startingPosition = new Vector3(-.55f,3,-10);
+		this.startingPosition = new Vector3(-.55f,0,-10);
 	}
 	
 	// Update is called once per frame
@@ -17,15 +19,14 @@ public class Batter : MonoBehaviour {
 		if (this.transform.position.y > 15) {
 			this.ResetBat ();
 		}
-
 	}
 
 	public void SwingBat() {
 		float multiplier = Random.Range (1000000, 5000000);
 
 		Debug.Log(multiplier);
-
-		this.rigidbody.AddForce((Vector3.up + Vector3.forward) * multiplier);
+		if (this.Ball && (this.Ball.beingThrown || this.Ball.beenHit))
+			this.rigidbody.AddForce(Vector3.forward * multiplier);
 	}
 
 	public void ResetBat() {
