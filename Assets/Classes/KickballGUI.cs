@@ -33,13 +33,13 @@ public class KickballGUI : MonoBehaviour
 			this.Pitcher.DecidePitch ();
 		} else {
 			if (this.Ball && this.Batter && !this.hasSwung) {
-				if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) {
+				/* if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) {
 
 					Vector2 touchPosition = Input.GetTouch(0).position;
 
 					this.Batter.transform.position = new Vector3(touchPosition.x / 5,this.Batter.transform.position.y,this.Batter.transform.position.z);
 
-				} else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) {
+				} else */if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) {
 					// Get movement of the finger since last frame
 					Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
 					
