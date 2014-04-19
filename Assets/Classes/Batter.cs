@@ -16,7 +16,7 @@ public class Batter : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (this.transform.position.y > 15) {
+		if (this.transform.position.z > 25) {
 			this.ResetBat ();
 		}
 	}
