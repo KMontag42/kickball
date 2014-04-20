@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using TouchScript;
+using TouchScript.Gestures;
+using TouchScript.Events;
 
 public class Batter : MonoBehaviour {
 
@@ -9,9 +12,14 @@ public class Batter : MonoBehaviour {
 
 	public Ball Ball;
 
+	private Time startTime;
+
 	// Use this for initialization
 	void Awake () {
 		this.startingPosition = transform.position;
+
+		GetComponent<FlickGesture>().StateChanged += flickHandler;
+		GetComponent<PanGesture>().StateChanged += pressHandler;
 	}
 	
 	// Update is called once per frame
@@ -33,5 +41,25 @@ public class Batter : MonoBehaviour {
 		this.rigidbody.velocity = Vector3.zero;
 		this.transform.position = this.startingPosition;
 		Debug.Log("starting position for batter " + this.startingPosition);
+	}
+
+	private void pressHandler(object sender, GestureStateChangeEventArgs gestureStateChangeEventArgs)
+	{
+		//rigidbody.velocity = Vector3.zero;
+		if ((sender as PanGesture).ScreenPosition.x != null) {
+			Vector3 moveDelta = (sender as PanGesture).WorldDeltaPosition;
+			moveDelta.y = 0;
+			transform.position += moveDelta;
+		}
+	}
+	
+	private void flickHandler(object sender, GestureStateChangeEventArgs e)
+	{
+		if (e.State == Gesture.GestureState.Recognized)
+		{
+			Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
+			Debug.Log(spd);
+			//speed = new Vector3(spd.y, -spd.x, 0);
+		}
 	}
 }
