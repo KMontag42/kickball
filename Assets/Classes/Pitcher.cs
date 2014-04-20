@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+
+
 public class Pitcher : MonoBehaviour {
 
 	public Ball Ball;
@@ -17,17 +19,19 @@ public class Pitcher : MonoBehaviour {
 
 	public PitcherState State {get; set;}
 
-	public Batter Batter;
+
 
 	// Use this for initialization
 	void Start () {
-		if (!Ball || !Batter) {
+		if (!Ball) {
 			Debug.LogError("Check prefab");
 		}
 
 		this.Ball.ResetBall ();
 
 		this.State = PitcherState.Holding;
+
+
 
 //		this.DecidePitch ();
 	}
@@ -53,11 +57,5 @@ public class Pitcher : MonoBehaviour {
 		this.ThrowBall ();
 	}
 
-	public void ReturnBall() {
-//		this.Ball.renderer.enabled = false;
 
-		this.Batter.ResetBat ();
-
-		this.State = PitcherState.Holding;
-	}
 }

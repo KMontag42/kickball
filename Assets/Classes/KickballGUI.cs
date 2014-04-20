@@ -5,7 +5,6 @@ public class KickballGUI : MonoBehaviour
 {
 
 	public Pitcher Pitcher;
-	public Batter Batter;
 	public Player Player;
 	public Ball Ball;
 

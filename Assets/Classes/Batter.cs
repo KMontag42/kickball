@@ -33,9 +33,10 @@ public class Batter : MonoBehaviour {
 	}
 
 	public void SwingBat(Vector3 direction) {
-		float multiplier = Random.Range (250000, 500000);
+		float multiplier = Random.Range (minVelocity, maxVelocity);
 
 		Debug.Log(multiplier);
+		Debug.Log(direction);
 //		if (this.Ball && (this.Ball.beingThrown || this.Ball.beenHit))
 		this.rigidbody.AddForce(direction * multiplier);
 	}
@@ -63,7 +64,7 @@ public class Batter : MonoBehaviour {
 			Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
 			Debug.Log(spd);
 
-			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, 1, (sender as FlickGesture).ScreenFlickVector.y);
+			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, (sender as FlickGesture).ScreenFlickVector.y, (sender as FlickGesture).ScreenFlickVector.y);
 
 			SwingBat(flickDirection.normalized);
 		}
