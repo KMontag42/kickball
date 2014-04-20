@@ -29,12 +29,12 @@ public class Batter : MonoBehaviour {
 		}
 	}
 
-	public void SwingBat() {
-		float multiplier = Random.Range (1000000, 5000000);
+	public void SwingBat(Vector3 direction) {
+		float multiplier = Random.Range (100000, 500000);
 
 		Debug.Log(multiplier);
-		if (this.Ball && (this.Ball.beingThrown || this.Ball.beenHit))
-			this.rigidbody.AddForce(Vector3.forward * multiplier);
+//		if (this.Ball && (this.Ball.beingThrown || this.Ball.beenHit))
+		this.rigidbody.AddForce(direction * multiplier);
 	}
 
 	public void ResetBat() {
@@ -46,20 +46,23 @@ public class Batter : MonoBehaviour {
 	private void pressHandler(object sender, GestureStateChangeEventArgs gestureStateChangeEventArgs)
 	{
 		//rigidbody.velocity = Vector3.zero;
-		if ((sender as PanGesture).ScreenPosition.x != null) {
-			Vector3 moveDelta = (sender as PanGesture).WorldDeltaPosition;
-			moveDelta.y = 0;
-			transform.position += moveDelta;
-		}
+//		if ((sender as PanGesture).ScreenPosition.x != null) {
+//			Vector3 moveDelta = (sender as PanGesture).WorldDeltaPosition;
+//			moveDelta.y = 0;
+//			transform.position += moveDelta;
+//		}
 	}
 	
 	private void flickHandler(object sender, GestureStateChangeEventArgs e)
 	{
-		if (e.State == Gesture.GestureState.Recognized)
+		if (e.State == Gesture.GestureState.Ended)
 		{
 			Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
 			Debug.Log(spd);
-			//speed = new Vector3(spd.y, -spd.x, 0);
+
+			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, 0, (sender as FlickGesture).ScreenFlickVector.y);
+
+			SwingBat(flickDirection.normalized);
 		}
 	}
 }
