@@ -33,6 +33,9 @@ public class KickballGUI : MonoBehaviour
 			this.Pitcher.DecidePitch ();
 		}
 
+		if (GUI.Button (new Rect(10, 170, 250, 50), "Reset Ball")) {
+			this.Ball.ResetBall();
+		}
 //		if (GUI.Button (new Rect (10, 70, 100, 50), "Swing Bat")) {
 //			this.Batter.SwingBat();
 //		}

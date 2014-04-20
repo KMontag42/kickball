@@ -14,6 +14,9 @@ public class Batter : MonoBehaviour {
 
 	private Time startTime;
 
+	public int minVelocity = 250000;
+	public int maxVelocity = 500000;
+
 	// Use this for initialization
 	void Awake () {
 		this.startingPosition = transform.position;
@@ -30,7 +33,7 @@ public class Batter : MonoBehaviour {
 	}
 
 	public void SwingBat(Vector3 direction) {
-		float multiplier = Random.Range (100000, 500000);
+		float multiplier = Random.Range (250000, 500000);
 
 		Debug.Log(multiplier);
 //		if (this.Ball && (this.Ball.beingThrown || this.Ball.beenHit))
@@ -60,7 +63,7 @@ public class Batter : MonoBehaviour {
 			Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
 			Debug.Log(spd);
 
-			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, 0, (sender as FlickGesture).ScreenFlickVector.y);
+			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, 1, (sender as FlickGesture).ScreenFlickVector.y);
 
 			SwingBat(flickDirection.normalized);
 		}

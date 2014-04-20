@@ -42,7 +42,7 @@ public class Pitcher : MonoBehaviour {
 
 		//this.Ball.renderer.enabled = true;
 
-		Vector3 throwVelocity = Vector3.back * Random.Range (100, 150);
+		Vector3 throwVelocity = Vector3.back * Random.Range (250, 300);
 
 		this.Ball.ThrowBall (throwVelocity, Random.Range (0,1));
 	}

@@ -66,8 +66,16 @@ public class Ball : MonoBehaviour
 
 				this.beenHit = true;
 
+				Debug.Log (collision.relativeVelocity.normalized);
+				Debug.Log (collision.relativeVelocity);
 				// todo : move to hit ball
+				this.hitVelocity = new Vector3(0,0,collision.relativeVelocity.z * 10);
+
+				Debug.Log("hitVeloc " + this.hitVelocity);
+
 				this.rigidbody.AddForce(this.hitVelocity);
+
+				Debug.Log("ball veloc after hit " + rigidbody.velocity);
 			} else if (collision.gameObject.name == "Strike") {
 				this.ResetBall();
 				this.Batter.ResetBat();
@@ -91,6 +99,9 @@ public class Ball : MonoBehaviour
 		this.throwingTorque = torque;
 
 		this.beingThrown = true;
+
+		this.rigidbody.AddForce (this.throwingVelocity);
+		this.rigidbody.AddTorque (Vector3.forward * this.throwingTorque);
 	}
 
 	public void ResetBall()
@@ -105,11 +116,6 @@ public class Ball : MonoBehaviour
 
 	void Update()
 	{
-		if (this.beingThrown) {
-			this.rigidbody.AddForce (this.throwingVelocity);
-			this.rigidbody.AddTorque (Vector3.forward * this.throwingTorque);
-		}
-
 		if(this.beenHit && this.rigidbody.velocity.sqrMagnitude > this.sqrMaxVelocity){ // Equivalent to: rigidbody.velocity.magnitude > maxVelocity, but faster.
 			// Vector3.normalized returns this vector with a magnitude 
 			// of 1. This ensures that we're not messing with the 
