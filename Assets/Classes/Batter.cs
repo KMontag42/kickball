@@ -11,7 +11,7 @@ public class Batter : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		this.startingPosition = new Vector3(-.55f,0,-10);
+		this.startingPosition = transform.position;
 	}
 	
 	// Update is called once per frame

@@ -40,9 +40,9 @@ public class Pitcher : MonoBehaviour {
 	void ThrowBall() {
 		this.State = PitcherState.Catching;
 
-		this.Ball.renderer.enabled = true;
+		//this.Ball.renderer.enabled = true;
 
-		Vector3 throwVelocity = Vector3.back * Random.Range (100, 250);
+		Vector3 throwVelocity = Vector3.back * Random.Range (100, 150);
 
 		this.Ball.ThrowBall (throwVelocity, Random.Range (0,1));
 	}

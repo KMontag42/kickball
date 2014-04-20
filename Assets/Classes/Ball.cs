@@ -31,10 +31,13 @@ public class Ball : MonoBehaviour
 	private Vector3 cameraStart;
 	private Quaternion cameraStartRotation;
 
+	private Vector3 startPosition;
+
 	void Awake()
 	{
 		cameraStart = camera.transform.position;
 		cameraStartRotation = camera.transform.rotation;
+		startPosition = transform.position;
 	}
 
 	void OnCollisionEnter (Collision collision)
@@ -61,15 +64,14 @@ public class Ball : MonoBehaviour
 				this.beingThrown = false;
 				this.Batter.ResetBat();
 
-//				this.hitVelocity = collision.rigidbody.velocity;
-
 				this.beenHit = true;
 
+				// todo : move to hit ball
 				this.rigidbody.AddForce(this.hitVelocity);
-			} else if (collision.gameObject.name == "Field") {
-				this.CatchBall();
+			} else if (collision.gameObject.name == "Strike") {
+				this.ResetBall();
+				this.Batter.ResetBat();
 				this.Player.Score -= 1;
-				Debug.Log ("hit ground - miss");
 			}
 		}
 	}
@@ -96,7 +98,7 @@ public class Ball : MonoBehaviour
 		this.beingThrown = false;
 		this.beenHit = false;
 		this.rigidbody.velocity = Vector3.zero;
-		this.transform.position = new Vector3 (0, Random.Range(.5f,3), 25); // TODO : make this a var
+		this.transform.position = startPosition;
 		this.rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		this.Batter.ResetBat();
 	}
@@ -123,12 +125,6 @@ public class Ball : MonoBehaviour
 			camera.transform.rotation = this.cameraStartRotation;
 			camera.GetComponent<SmoothLookAt>().target = null;
 			camera.GetComponent<SmoothFollow>().target = null;
-		}
-
-		if (this.transform.position.z < -15) {
-			this.ResetBall();
-			this.Batter.ResetBat();
-			this.Player.Score -= 1;
 		}
 	}
 }
