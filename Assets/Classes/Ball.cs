@@ -63,7 +63,7 @@ public class Ball : MonoBehaviour
 				ResetBall();
 				Player.Score -= 1;
 				StartCoroutine(BounceAlertText(FoulText));
-			} else if (collision.gameObject.name == "Extra Pitch") {
+			} else if (collision.gameObject.name == "Extra Pitch" && beenHit) {
 				ExtraPitch.BallHit();
 			}
 		}
@@ -78,30 +78,30 @@ public class Ball : MonoBehaviour
 		} else if (collision.gameObject.name == "Hit Zone End") {
 			canHit = false;
 			(GetComponent("Halo") as Behaviour).enabled = false;
-		} else if (collision.gameObject.name == "Single") {
+		} else if (collision.gameObject.name == "Single" && beenHit) {
 			CatchBall ();
 			Player.Score += 1;
 			Debug.Log("hit ground - single");
 
 			StartCoroutine(BounceAlertText(SingleText));
 
-		} else if (collision.gameObject.name == "Double") {
+		} else if (collision.gameObject.name == "Double" && beenHit) {
 			CatchBall ();
 			Player.Score += 2;
 			Debug.Log("hit ground - double");
 
 			StartCoroutine(BounceAlertText(DoubleText));
 
-		} else if (collision.gameObject.name == "Triple") {
+		} else if (collision.gameObject.name == "Triple" && beenHit) {
 			CatchBall ();
 			Player.Score += 3;
 			Debug.Log("hit ground - triple");
 
 			StartCoroutine(BounceAlertText(TripleText));
 
-		} else if (collision.gameObject.name == "Home Run") {
+		} else if (collision.gameObject.name == "Home Run" && beenHit) {
 			CatchBall ();
-			Player.Score += 4;
+			Player.Score += 5;
 			Debug.Log("hit ground - home run");
 
 			StartCoroutine(BounceAlertText(HomeRunText));
@@ -164,6 +164,15 @@ public class Ball : MonoBehaviour
 		if (beenHit) {
 			mainCamera.GetComponent<SmoothLookAt>().target = gameObject.transform;
 			mainCamera.GetComponent<SmoothFollow>().target = gameObject.transform;
+
+			if (transform.position.z > 900) {
+				CatchBall ();
+				Player.Score += 4;
+				Debug.Log("past bounds - home run");
+				
+				StartCoroutine(BounceAlertText(HomeRunText));
+			}
+
 		} else {
 			mainCamera.transform.position = cameraStart;
 			mainCamera.transform.rotation = cameraStartRotation;
@@ -191,13 +200,6 @@ public class Ball : MonoBehaviour
 
 			rigidbody.AddForceAtPosition(flickDirection, flickStart);
 
-			/* TODO
-			 * scale the veloc based on how close to the end of the hit zone we are
-			 * make camera less shitty
-			 * foul ball zone
-			 * 
-			 */
-
 			canHit = false;
 			beenHit = true;
 
@@ -220,8 +222,10 @@ public class Ball : MonoBehaviour
 
 	private IEnumerator BounceAlertText(GameObject textToBound)
 	{
-		yield return MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y + 6, textToBound.transform.position.z), .5f);
-		yield return MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y - 6, textToBound.transform.position.z), .5f);
+		Debug.Log(textToBound.transform.position);
+		yield return StartCoroutine(MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y + 6, textToBound.transform.position.z), .5f));
+		Debug.Log(textToBound.transform.position);
+		yield return StartCoroutine(MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y - 6, textToBound.transform.position.z), .5f));
 	}
 
 	private IEnumerator MoveObject (Transform thisTransform, Vector3 startPos, Vector3 endPos, float time) {
@@ -230,9 +234,9 @@ public class Ball : MonoBehaviour
 		Debug.Log(thisTransform);
 		while (i < 1.0f) {
 			i += Time.deltaTime * rate;
-
+			thisTransform.position = Vector3.Lerp(startPos, endPos, i);
 			Debug.Log(thisTransform);
-			yield return thisTransform.position = Vector3.Lerp(startPos, endPos, i);;
+			yield return null;
 		}
 	}
 }
