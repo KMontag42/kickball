@@ -16,7 +16,7 @@ public class Ball : MonoBehaviour
 	public Pitcher Pitcher;
 	public Player Player;
 
-	private bool destroyMe = false;
+	//private bool destroyMe = false;
 	public bool beingThrown = false;
 	public bool beenHit = false;
 
@@ -25,8 +25,8 @@ public class Ball : MonoBehaviour
 
 	private Vector3 hitVelocity;
 
-	private float maxVelocity = 15.0f;
-	private float sqrMaxVelocity = 15 * 15;
+	//private float maxVelocity = 15.0f;
+	//private float sqrMaxVelocity = 15 * 15;
 
 	public GameObject mainCamera;
 	private Vector3 cameraStart;
@@ -52,27 +52,27 @@ public class Ball : MonoBehaviour
 	{
 		if (Pitcher != null) {
 			if (collision.gameObject.name == "Single") {
-				this.CatchBall ();
-				this.Player.Score += 1;
+				CatchBall ();
+				Player.Score += 1;
 				Debug.Log("hit ground - single");
 			} else if (collision.gameObject.name == "Double") {
-				this.CatchBall ();
-				this.Player.Score += 2;
+				CatchBall ();
+				Player.Score += 2;
 				Debug.Log("hit ground - double");
 			} else if (collision.gameObject.name == "Triple") {
-				this.CatchBall ();
-				this.Player.Score += 3;
+				CatchBall ();
+				Player.Score += 3;
 				Debug.Log("hit ground - triple");
 			} else if (collision.gameObject.name == "Home Run") {
-				this.CatchBall ();
-				this.Player.Score += 4;
+				CatchBall ();
+				Player.Score += 4;
 				Debug.Log("hit ground - home run");
 			} else if (collision.gameObject.name == "Strike") {
-				this.ResetBall();
-				this.Player.Score -= 1;
+				ResetBall();
+				Player.Score -= 1;
 			} else if (collision.gameObject.name == "Ground" && beenHit) {
-				this.ResetBall();
-				this.Player.Score -= 1;
+				ResetBall();
+				Player.Score -= 1;
 			}
 		}
 	}
@@ -82,54 +82,64 @@ public class Ball : MonoBehaviour
 		Debug.Log(collision.gameObject.name);
 		if (collision.gameObject.name == "HitZoneStart") {
 			canHit = true;
+			(GetComponent("Halo") as Behaviour).enabled = !beenHit;
 		} else if (collision.gameObject.name == "Hit Zone End") {
 			canHit = false;
+			(GetComponent("Halo") as Behaviour).enabled = false;
 		}
 	}
 	
 	public void CatchBall()
 	{
-		this.ResetBall ();
+		ResetBall ();
 	}
 
 	public void ThrowBall(Vector3 velocity, float torque)
 	{
-		this.rigidbody.constraints = RigidbodyConstraints.None;
+		if (Player.remainingPitches > 0) {
+			rigidbody.constraints = RigidbodyConstraints.None;
 
-		this.throwingVelocity = velocity;
+			throwingVelocity = velocity;
 
-		this.throwingTorque = torque;
+			throwingTorque = torque;
 
-		this.beingThrown = true;
+			beingThrown = true;
 
-		this.rigidbody.AddForce (this.throwingVelocity);
-		this.rigidbody.AddTorque (Vector3.forward * this.throwingTorque);
+			rigidbody.AddForce (throwingVelocity);
+			rigidbody.AddTorque (Vector3.forward * throwingTorque);
+		}
 	}
 
 	public void ResetBall()
 	{
-		this.beingThrown = false;
-		this.beenHit = false;
-		this.rigidbody.velocity = Vector3.zero;
-		this.transform.position = startPosition;
-		this.rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+		beingThrown = false;
+		beenHit = false;
+		rigidbody.velocity = Vector3.zero;
+		transform.position = startPosition;
+		rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+		Player.remainingPitches--;
+		if (Player.remainingPitches <= 0) {
+			// end game
+		}
+		(GetComponent("Halo") as Behaviour).enabled = false;
+		GetComponent<TrailRenderer>().enabled = false;
 	}
 
 	void Update()
 	{
-//		if(this.beenHit && this.rigidbody.velocity.sqrMagnitude > this.sqrMaxVelocity){ // Equivalent to: rigidbody.velocity.magnitude > maxVelocity, but faster.
+//		if(beenHit && rigidbody.velocity.sqrMagnitude > sqrMaxVelocity){ // Equivalent to: rigidbody.velocity.magnitude > maxVelocity, but faster.
 //			// Vector3.normalized returns this vector with a magnitude 
 //			// of 1. This ensures that we're not messing with the 
 //			// direction of the vector, only its magnitude.
-//			this.rigidbody.velocity = this.rigidbody.velocity.normalized * maxVelocity;
+//			rigidbody.velocity = rigidbody.velocity.normalized * maxVelocity;
 //		}
 
-		if (this.beenHit) {
-			mainCamera.GetComponent<SmoothLookAt>().target = this.gameObject.transform;
-			mainCamera.GetComponent<SmoothFollow>().target = this.gameObject.transform;
+		if (beenHit) {
+			mainCamera.GetComponent<SmoothLookAt>().target = gameObject.transform;
+			mainCamera.GetComponent<SmoothFollow>().target = gameObject.transform;
 		} else {
-			mainCamera.transform.position = this.cameraStart;
-			mainCamera.transform.rotation = this.cameraStartRotation;
+			mainCamera.transform.position = cameraStart;
+			mainCamera.transform.rotation = cameraStartRotation;
 			mainCamera.GetComponent<SmoothLookAt>().target = null;
 			mainCamera.GetComponent<SmoothFollow>().target = null;
 		}
@@ -137,10 +147,10 @@ public class Ball : MonoBehaviour
 
 	private void flickHandler(object sender, GestureStateChangeEventArgs e)
 	{
-		FlickGesture flick = (sender as FlickGesture);
+		//FlickGesture flick = (sender as FlickGesture);
 		
 		if (e.State == Gesture.GestureState.Recognized && beenHit) {
-			Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
+			//Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
 			
 			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, (sender as FlickGesture).ScreenFlickVector.y, (sender as FlickGesture).ScreenFlickVector.y);
 			
@@ -161,9 +171,10 @@ public class Ball : MonoBehaviour
 			 * 
 			 */
 
-
 			canHit = false;
 			beenHit = true;
+
+			GetComponent<TrailRenderer>().enabled = true;
 		}
 	}
 

@@ -11,16 +11,6 @@ public class Pitcher : MonoBehaviour {
 
 	public Ball Ball;
 
-	public enum PitcherState {
-		Holding,
-		Throwing,
-		Catching
-	}
-
-	public PitcherState State {get; set;}
-
-
-
 	// Use this for initialization
 	void Start () {
 		if (!Ball) {
@@ -28,10 +18,6 @@ public class Pitcher : MonoBehaviour {
 		}
 
 		this.Ball.ResetBall ();
-
-		this.State = PitcherState.Holding;
-
-
 
 //		this.DecidePitch ();
 	}
@@ -42,8 +28,6 @@ public class Pitcher : MonoBehaviour {
 	}
 
 	void ThrowBall() {
-		this.State = PitcherState.Catching;
-
 		//this.Ball.renderer.enabled = true;
 
 		Vector3 throwVelocity = Vector3.back * Random.Range (250, 300);
@@ -52,8 +36,6 @@ public class Pitcher : MonoBehaviour {
 	}
 
 	public void DecidePitch() {
-		this.State = PitcherState.Throwing;
-
 		this.ThrowBall ();
 	}
 

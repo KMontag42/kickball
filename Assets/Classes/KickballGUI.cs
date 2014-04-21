@@ -8,14 +8,14 @@ public class KickballGUI : MonoBehaviour
 	public Player Player;
 	public Ball Ball;
 
-	private float ballMaxSpeed = 10000;
+	//private float ballMaxSpeed = 10000;
 
-	private bool hasSwung = false;
+//	private bool hasSwung = false;
 
 	// Use this for initialization
 	void Start ()
 	{
-		if (!this.Player) {
+		if (!Player) {
 			Debug.LogError("No player on ball");
 		}
 	}
@@ -28,19 +28,21 @@ public class KickballGUI : MonoBehaviour
 
 	void OnGUI()
 	{
-		if (GUI.Button (new Rect (10, 10, 250, 150), "Decide Pitch")) {
-			this.Pitcher.DecidePitch ();
-		}
+		if (Ball.beenHit == false && Ball.beingThrown == false)
+		if (GUI.Button (new Rect ((Screen.width / 2) - 125, (Screen.height / 2) - 75, 250, 150), "Throw The Pitch!")) {
+				Pitcher.DecidePitch ();
+			}
 
-		if (GUI.Button (new Rect(10, 170, 250, 50), "Reset Ball")) {
-			this.Ball.ResetBall();
+		if (GUI.Button (new Rect((Screen.width / 6) - 25, (Screen.height / 8) - 12.5f, 50, 25), "Reset Ball")) {
+			Ball.ResetBall();
 		}
 //		if (GUI.Button (new Rect (10, 70, 100, 50), "Swing Bat")) {
-//			this.Batter.SwingBat();
+//			Batter.SwingBat();
 //		}
 
-		if (this.Player) {
-			GUI.Label (new Rect (110, 10, 50, 50), this.Player.Score.ToString ());
+		if (Player) {
+			GUI.Label (new Rect (150, 10, 50, 50), Player.Score.ToString ());
+			GUI.Label (new Rect (80, 10, 50, 50), Player.remainingPitches.ToString ());
 		}
 	}
 }
