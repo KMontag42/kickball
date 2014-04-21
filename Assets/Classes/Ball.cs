@@ -10,11 +10,13 @@
 using UnityEngine;
 using TouchScript.Events;
 using TouchScript.Gestures;
+using System.Collections;
 
 public class Ball : MonoBehaviour
 {
 	public Pitcher Pitcher;
 	public Player Player;
+	public ExtraPitch ExtraPitch;
 
 	//private bool destroyMe = false;
 	public bool beingThrown = false;
@@ -38,6 +40,12 @@ public class Ball : MonoBehaviour
 
 	public bool canHit = false;
 
+	public GameObject SingleText;
+	public GameObject DoubleText;
+	public GameObject TripleText;
+	public GameObject HomeRunText;
+	public GameObject FoulText;
+
 	void Awake()
 	{
 		cameraStart = mainCamera.transform.position;
@@ -51,28 +59,12 @@ public class Ball : MonoBehaviour
 	void OnCollisionEnter (Collision collision)
 	{
 		if (Pitcher != null) {
-			if (collision.gameObject.name == "Single") {
-				CatchBall ();
-				Player.Score += 1;
-				Debug.Log("hit ground - single");
-			} else if (collision.gameObject.name == "Double") {
-				CatchBall ();
-				Player.Score += 2;
-				Debug.Log("hit ground - double");
-			} else if (collision.gameObject.name == "Triple") {
-				CatchBall ();
-				Player.Score += 3;
-				Debug.Log("hit ground - triple");
-			} else if (collision.gameObject.name == "Home Run") {
-				CatchBall ();
-				Player.Score += 4;
-				Debug.Log("hit ground - home run");
-			} else if (collision.gameObject.name == "Strike") {
+			if (collision.gameObject.name == "Ground" && beenHit) {
 				ResetBall();
 				Player.Score -= 1;
-			} else if (collision.gameObject.name == "Ground" && beenHit) {
-				ResetBall();
-				Player.Score -= 1;
+				StartCoroutine(BounceAlertText(FoulText));
+			} else if (collision.gameObject.name == "Extra Pitch") {
+				ExtraPitch.BallHit();
 			}
 		}
 	}
@@ -86,6 +78,37 @@ public class Ball : MonoBehaviour
 		} else if (collision.gameObject.name == "Hit Zone End") {
 			canHit = false;
 			(GetComponent("Halo") as Behaviour).enabled = false;
+		} else if (collision.gameObject.name == "Single") {
+			CatchBall ();
+			Player.Score += 1;
+			Debug.Log("hit ground - single");
+
+			StartCoroutine(BounceAlertText(SingleText));
+
+		} else if (collision.gameObject.name == "Double") {
+			CatchBall ();
+			Player.Score += 2;
+			Debug.Log("hit ground - double");
+
+			StartCoroutine(BounceAlertText(DoubleText));
+
+		} else if (collision.gameObject.name == "Triple") {
+			CatchBall ();
+			Player.Score += 3;
+			Debug.Log("hit ground - triple");
+
+			StartCoroutine(BounceAlertText(TripleText));
+
+		} else if (collision.gameObject.name == "Home Run") {
+			CatchBall ();
+			Player.Score += 4;
+			Debug.Log("hit ground - home run");
+
+			StartCoroutine(BounceAlertText(HomeRunText));
+
+		} else if (collision.gameObject.name == "Strike") {
+			ResetBall();
+			Player.Score -= 1;
 		}
 	}
 	
@@ -123,6 +146,10 @@ public class Ball : MonoBehaviour
 		}
 		(GetComponent("Halo") as Behaviour).enabled = false;
 		GetComponent<TrailRenderer>().enabled = false;
+
+		if (Random.Range(0f,1f) > .5f) {
+			ExtraPitch.ResetPosition();
+		}
 	}
 
 	void Update()
@@ -188,6 +215,24 @@ public class Ball : MonoBehaviour
 			Debug.Log("pressed");
 			flickStart = mainCamera.camera.ScreenToWorldPoint(press.ScreenPosition);
 			beenHit = true;
+		}
+	}
+
+	private IEnumerator BounceAlertText(GameObject textToBound)
+	{
+		yield return MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y + 6, textToBound.transform.position.z), .5f);
+		yield return MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y - 6, textToBound.transform.position.z), .5f);
+	}
+
+	private IEnumerator MoveObject (Transform thisTransform, Vector3 startPos, Vector3 endPos, float time) {
+		float i = 0.0f;
+		float rate = 1.0f/time;
+		Debug.Log(thisTransform);
+		while (i < 1.0f) {
+			i += Time.deltaTime * rate;
+
+			Debug.Log(thisTransform);
+			yield return thisTransform.position = Vector3.Lerp(startPos, endPos, i);;
 		}
 	}
 }

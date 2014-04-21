@@ -28,10 +28,11 @@ public class KickballGUI : MonoBehaviour
 
 	void OnGUI()
 	{
-		if (Ball.beenHit == false && Ball.beingThrown == false)
-		if (GUI.Button (new Rect ((Screen.width / 2) - 125, (Screen.height / 2) - 75, 250, 150), "Throw The Pitch!")) {
+		if (Ball.beenHit == false && Ball.beingThrown == false) {
+			if (GUI.Button (new Rect ((Screen.width / 2) - 125, (Screen.height / 2) - 75, 250, 150), "Throw The Pitch!")) {
 				Pitcher.DecidePitch ();
 			}
+		}
 
 		if (GUI.Button (new Rect((Screen.width / 6) - 25, (Screen.height / 8) - 12.5f, 50, 25), "Reset Ball")) {
 			Ball.ResetBall();
