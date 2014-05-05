@@ -7,6 +7,8 @@ public class KickballGUI : MonoBehaviour
 	public Pitcher Pitcher;
 	public Player Player;
 	public Ball Ball;
+	
+	public GUIStyle throwPitch;
 
 	//private float ballMaxSpeed = 10000;
 
@@ -16,7 +18,7 @@ public class KickballGUI : MonoBehaviour
 	void Start ()
 	{
 		if (!Player) {
-			Debug.LogError("No player on ball");
+			Debug.LogError ("No player on ball");
 		}
 	}
 
@@ -26,25 +28,56 @@ public class KickballGUI : MonoBehaviour
 
 	}
 
-	void OnGUI()
+	void OnGUI ()
 	{
-		if (Ball.beenHit == false && Ball.beingThrown == false) {
+		if (Ball.beenHit == false && Ball.beingThrown == false && Player.remainingPitches > 0) {
 			if (GUI.Button (new Rect ((Screen.width / 2) - 125, (Screen.height / 2) - 75, 250, 150), "Throw The Pitch!")) {
 				Pitcher.DecidePitch ();
 			}
 		}
 
-		if (GUI.Button (new Rect((Screen.width / 6) - 25, (Screen.height / 8) - 12.5f, 50, 25), "Reset Ball")) {
-			Ball.ResetBall();
+		if (Player.remainingPitches <= 0) {
+		
+			if (Skillz.tournamentIsInProgress()) {
+				Skillz.displayTournamentResultsWithScore(Player.Score);
+			} else {
+				if (GUI.Button (new Rect ((Screen.width / 2) - 125, (Screen.height / 2) - 75, 250, 150), "New Game?")) {
+					Player.remainingPitches = Player.maxPitches + 1;
+					Player.Score = 0;
+					Ball.ResetBall ();
+				}
+			}
 		}
-//		if (GUI.Button (new Rect (10, 70, 100, 50), "Swing Bat")) {
-//			Batter.SwingBat();
-//		}
 
 		if (Player) {
-			GUI.Label (new Rect (150, 10, 50, 50), Player.Score.ToString ());
-			GUI.Label (new Rect (80, 10, 50, 50), Player.remainingPitches.ToString ());
+			for (var i = 0; i <= Player.scores.Count; i++) {
+				if (i == Player.scores.Count) {
+					GUI.Box(new Rect(30 + (20*i), 10, 25, 20), Player.Score.ToString());
+				} else {
+					switch (Player.scores[i]) {
+						case -1:
+							GUI.Box (new Rect(10 + (20*i), 10, 15, 20), "X");
+							break;
+						case 0:
+							GUI.Box (new Rect(10 + (20*i), 10, 15, 20), "");	
+							break;
+						case 5:
+							GUI.Box (new Rect(10 + (20*i), 10, 15, 20), "H");
+							break;
+						default:
+			            	GUI.Box (new Rect(10 + (20*i), 10, 15, 20), Player.scores[i].ToString());
+			            	break;
+					}
+					
+				}
+			}
+			
+			GUI.Box (new Rect (10, 35, 100, 20), "Remaining: " + Player.remainingPitches.ToString ());
+			GUI.Box (new Rect (10, 60, 100, 20), "Multiplier: " + Player.multiplier.ToString ());
 		}
+		
+		
+		
 	}
 }
 

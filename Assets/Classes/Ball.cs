@@ -20,11 +20,9 @@ public class Ball : MonoBehaviour
 
 	//private bool destroyMe = false;
 	public bool beingThrown = false;
-	public bool beenHit = false;
-
+	public bool beingHit = false;
 	private Vector3 throwingVelocity;
 	private float throwingTorque;
-
 	private Vector3 hitVelocity;
 
 	//private float maxVelocity = 15.0f;
@@ -33,109 +31,137 @@ public class Ball : MonoBehaviour
 	public GameObject mainCamera;
 	private Vector3 cameraStart;
 	private Quaternion cameraStartRotation;
-
 	private Vector3 startPosition;
-
 	private Vector3 flickStart;
-
 	public bool canHit = false;
-
+	
 	public GameObject SingleText;
 	public GameObject DoubleText;
 	public GameObject TripleText;
 	public GameObject HomeRunText;
 	public GameObject FoulText;
+	public GameObject SwingNowText;
+	
+	public float flickDistanceFromHome;
+	public float flickDivisor;
+	
+	public bool isHomeRun = false;
+	public bool beenHit = false;
 
-	void Awake()
+	private ParticleSystem hitParticleSystem;
+	
+	void Awake ()
 	{
 		cameraStart = mainCamera.transform.position;
 		cameraStartRotation = mainCamera.transform.rotation;
 		startPosition = transform.position;
 
-		GetComponent<FlickGesture>().StateChanged += flickHandler;
-		GetComponent<PressGesture>().StateChanged += pressHandler;
+		hitParticleSystem = GetComponent<ParticleSystem>();
+
+		GetComponent<FlickGesture> ().StateChanged += flickHandler;
+		GetComponent<PressGesture> ().StateChanged += pressHandler;
 	}
 
 	void OnCollisionEnter (Collision collision)
 	{
 		if (Pitcher != null) {
 			if (collision.gameObject.name == "Ground" && beenHit) {
-				ResetBall();
-				Player.Score -= 1;
-				StartCoroutine(BounceAlertText(FoulText));
+				ResetBall ();
+				Player.ChangeScore(-1);
+				StartCoroutine (BounceAlertText (FoulText));
 			} else if (collision.gameObject.name == "Extra Pitch" && beenHit) {
-				ExtraPitch.BallHit();
+				ExtraPitch.BallHit ();
 			}
 		}
 	}
 
-	void OnTriggerEnter(Collider collision)
+	void OnTriggerEnter (Collider collision)
 	{
-		Debug.Log(collision.gameObject.name);
 		if (collision.gameObject.name == "HitZoneStart") {
 			canHit = true;
-			(GetComponent("Halo") as Behaviour).enabled = !beenHit;
+			
+			if (Player.isTutorialPitch) {
+				(GetComponent ("Halo") as Behaviour).enabled = true;
+				Time.timeScale = 0.3f;
+				StartCoroutine(BounceAlertText(SwingNowText));
+			}
+			
 		} else if (collision.gameObject.name == "Hit Zone End") {
 			canHit = false;
-			(GetComponent("Halo") as Behaviour).enabled = false;
+			
+			if (Player.isTutorialPitch) {
+				(GetComponent ("Halo") as Behaviour).enabled = false;
+				
+			}
+			
+			Time.timeScale = 1;
+			
 		} else if (collision.gameObject.name == "Single" && beenHit) {
 			CatchBall ();
-			Player.Score += 1;
-			Debug.Log("hit ground - single");
+			Player.ChangeScore(1);
+			Player.HitNotHomeRun();
+			Debug.Log ("hit ground - single");
 
-			StartCoroutine(BounceAlertText(SingleText));
+			StartCoroutine (BounceAlertText (SingleText));
 
 		} else if (collision.gameObject.name == "Double" && beenHit) {
 			CatchBall ();
-			Player.Score += 2;
-			Debug.Log("hit ground - double");
+			Player.ChangeScore(2);
+			Player.HitNotHomeRun();
+			Debug.Log ("hit ground - double");
 
-			StartCoroutine(BounceAlertText(DoubleText));
+			StartCoroutine (BounceAlertText (DoubleText));
 
 		} else if (collision.gameObject.name == "Triple" && beenHit) {
 			CatchBall ();
-			Player.Score += 3;
-			Debug.Log("hit ground - triple");
+			Player.ChangeScore(3);
+			Player.HitNotHomeRun();
+			Debug.Log ("hit ground - triple");
 
-			StartCoroutine(BounceAlertText(TripleText));
+			StartCoroutine (BounceAlertText (TripleText));
 
 		} else if (collision.gameObject.name == "Home Run" && beenHit) {
 			CatchBall ();
-			Player.Score += 5;
-			Debug.Log("hit ground - home run");
+			Player.ChangeScore(5);
+			Player.HitHomeRun();
+			Debug.Log ("hit ground - home run");
 
-			StartCoroutine(BounceAlertText(HomeRunText));
+			StartCoroutine (BounceAlertText (HomeRunText));
 
 		} else if (collision.gameObject.name == "Strike") {
-			ResetBall();
-			Player.Score -= 1;
+			ResetBall ();
+			Player.ChangeScore(-1);
+			Player.HitFoulOrStrike();
+		} else if (collision.gameObject.name == "Foul") {
+			ResetBall ();
+			Player.ChangeScore(-1);
+			Player.HitFoulOrStrike();
+			StartCoroutine (BounceAlertText (FoulText));
 		}
 	}
-	
-	public void CatchBall()
+
+	public void CatchBall ()
 	{
 		ResetBall ();
 	}
 
-	public void ThrowBall(Vector3 velocity, float torque)
+	public void ThrowBall (Vector3 velocity, float torque)
 	{
 		if (Player.remainingPitches > 0) {
 			rigidbody.constraints = RigidbodyConstraints.None;
 
-			throwingVelocity = velocity;
-
-			throwingTorque = torque;
-
 			beingThrown = true;
 
-			rigidbody.AddForce (throwingVelocity);
-			rigidbody.AddTorque (Vector3.forward * throwingTorque);
+			rigidbody.AddForceAtPosition (velocity, transform.position);
+			if (!Player.isTutorialPitch)
+				constantForce.force = new Vector3(torque, torque, 0);
 		}
 	}
 
-	public void ResetBall()
+	public void ResetBall ()
 	{
 		beingThrown = false;
+		beingHit = false;
 		beenHit = false;
 		rigidbody.velocity = Vector3.zero;
 		transform.position = startPosition;
@@ -144,15 +170,19 @@ public class Ball : MonoBehaviour
 		if (Player.remainingPitches <= 0) {
 			// end game
 		}
-		(GetComponent("Halo") as Behaviour).enabled = false;
-		GetComponent<TrailRenderer>().enabled = false;
+		(GetComponent ("Halo") as Behaviour).enabled = false;
+		GetComponent<TrailRenderer> ().enabled = false;
 
-		if (Random.Range(0f,1f) > .5f) {
-			ExtraPitch.ResetPosition();
+		if (Random.Range (0f, 1f) > .5f) {
+			ExtraPitch.ResetPosition ();
 		}
+		
+		isHomeRun = false;
+		
+		Time.timeScale = 1;
 	}
 
-	void Update()
+	void Update ()
 	{
 //		if(beenHit && rigidbody.velocity.sqrMagnitude > sqrMaxVelocity){ // Equivalent to: rigidbody.velocity.magnitude > maxVelocity, but faster.
 //			// Vector3.normalized returns this vector with a magnitude 
@@ -162,80 +192,92 @@ public class Ball : MonoBehaviour
 //		}
 
 		if (beenHit) {
-			mainCamera.GetComponent<SmoothLookAt>().target = gameObject.transform;
-			mainCamera.GetComponent<SmoothFollow>().target = gameObject.transform;
+			if (!isHomeRun) {
+				mainCamera.GetComponent<SmoothLookAt> ().target = gameObject.transform;
+				mainCamera.GetComponent<SmoothFollow> ().target = gameObject.transform;
+			} else {
+				mainCamera.transform.position = cameraStart;
+				mainCamera.transform.rotation = cameraStartRotation;
+				mainCamera.GetComponent<SmoothLookAt> ().target = null;
+				mainCamera.GetComponent<SmoothFollow> ().target = null;
+			}
+			
 
 			if (transform.position.z > 900) {
 				CatchBall ();
-				Player.Score += 4;
-				Debug.Log("past bounds - home run");
-				
-				StartCoroutine(BounceAlertText(HomeRunText));
+				Player.ChangeScore(5);
+				Debug.Log ("past bounds - home run");
+			
+				StartCoroutine (BounceAlertText (HomeRunText));
 			}
 
 		} else {
 			mainCamera.transform.position = cameraStart;
 			mainCamera.transform.rotation = cameraStartRotation;
-			mainCamera.GetComponent<SmoothLookAt>().target = null;
-			mainCamera.GetComponent<SmoothFollow>().target = null;
+			mainCamera.GetComponent<SmoothLookAt> ().target = null;
+			mainCamera.GetComponent<SmoothFollow> ().target = null;
 		}
 	}
 
-	private void flickHandler(object sender, GestureStateChangeEventArgs e)
+	private void flickHandler (object sender, GestureStateChangeEventArgs e)
 	{
 		//FlickGesture flick = (sender as FlickGesture);
-		
-		if (e.State == Gesture.GestureState.Recognized && beenHit) {
+	
+		if (e.State == Gesture.GestureState.Recognized && beingHit) {
 			//Vector2 spd = ((sender as FlickGesture).ScreenFlickVector/(sender as FlickGesture).ScreenFlickTime);
+		
+			Vector3 flickDirection = new Vector3 ((sender as FlickGesture).ScreenFlickVector.x, (sender as FlickGesture).ScreenFlickVector.y, (sender as FlickGesture).ScreenFlickVector.y);
 			
-			Vector3 flickDirection = new Vector3((sender as FlickGesture).ScreenFlickVector.x, (sender as FlickGesture).ScreenFlickVector.y, (sender as FlickGesture).ScreenFlickVector.y);
+			flickDistanceFromHome = Vector3.Distance (transform.position, GameObject.Find ("Hit Zone End").transform.position);
+
+			flickDivisor = 1.5f / Vector3.Distance (transform.position, GameObject.Find ("Hit Zone End").transform.position);
 			
-			Debug.Log("flickDirection  " + flickDirection);
+			if (flickDivisor >= 1f) {
+				isHomeRun = true;
+			}
+			
+			hitParticleSystem.Emit((int)(100 * flickDivisor));
 
-			Debug.Log (Vector3.Distance(transform.position, GameObject.Find("Hit Zone End").transform.position));
+			flickDirection.Scale (new Vector3 (1 * flickDivisor, .5f * flickDivisor, 1 * flickDivisor));
 
-			float divisor = 4 / Vector3.Distance(transform.position, GameObject.Find("Hit Zone End").transform.position);
-
-			flickDirection.Scale(new Vector3(1 * divisor,.5f * divisor, 1 * divisor));
-
-			rigidbody.AddForceAtPosition(flickDirection, flickStart);
-
+			rigidbody.AddForceAtPosition (flickDirection, flickStart);
+			
+			constantForce.force = Vector3.zero;
+			
 			canHit = false;
+			beingHit = false;
 			beenHit = true;
 
-			GetComponent<TrailRenderer>().enabled = true;
+			GetComponent<TrailRenderer> ().enabled = true;
+			
+			Time.timeScale = 1;
 		}
 	}
 
-	private void pressHandler(object sender, GestureStateChangeEventArgs e)
+	private void pressHandler (object sender, GestureStateChangeEventArgs e)
 	{
 		PressGesture press = (sender as PressGesture);
-
-		Debug.Log(press.ScreenPosition);
-		
+	
 		if (e.State == Gesture.GestureState.Ended && canHit) {
-			Debug.Log("pressed");
-			flickStart = mainCamera.camera.ScreenToWorldPoint(press.ScreenPosition);
-			beenHit = true;
+			Debug.Log ("pressed");
+			flickStart = mainCamera.camera.ScreenToWorldPoint (press.ScreenPosition);
+			beingHit = true;
 		}
 	}
 
-	private IEnumerator BounceAlertText(GameObject textToBound)
+	private IEnumerator BounceAlertText (GameObject textToBound)
 	{
-		Debug.Log(textToBound.transform.position);
-		yield return StartCoroutine(MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y + 6, textToBound.transform.position.z), .5f));
-		Debug.Log(textToBound.transform.position);
-		yield return StartCoroutine(MoveObject(textToBound.transform, textToBound.transform.position, new Vector3(textToBound.transform.position.x, textToBound.transform.position.y - 6, textToBound.transform.position.z), .5f));
+		yield return StartCoroutine (MoveObject (textToBound.transform, textToBound.transform.position, new Vector3 (textToBound.transform.position.x, textToBound.transform.position.y + 6, textToBound.transform.position.z), .5f));
+		yield return StartCoroutine (MoveObject (textToBound.transform, textToBound.transform.position, new Vector3 (textToBound.transform.position.x, textToBound.transform.position.y - 6, textToBound.transform.position.z), .5f));
 	}
 
-	private IEnumerator MoveObject (Transform thisTransform, Vector3 startPos, Vector3 endPos, float time) {
+	private IEnumerator MoveObject (Transform thisTransform, Vector3 startPos, Vector3 endPos, float time)
+	{
 		float i = 0.0f;
-		float rate = 1.0f/time;
-		Debug.Log(thisTransform);
+		float rate = 1.0f / time;
 		while (i < 1.0f) {
 			i += Time.deltaTime * rate;
-			thisTransform.position = Vector3.Lerp(startPos, endPos, i);
-			Debug.Log(thisTransform);
+			thisTransform.position = Vector3.Lerp (startPos, endPos, i);
 			yield return null;
 		}
 	}
